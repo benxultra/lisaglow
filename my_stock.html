@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlowFlow - My Stock</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Ubuntu', sans-serif;
+            background-color: #0d0d17;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .header {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            width: 100px;
+            height: auto;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 10px #ff00ff);
+        }
+
+        .tile {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1, h2 {
+            margin-top: 0;
+            text-shadow: 0 0 5px #ff00ff;
+        }
+       
+        #inventoryTotalWorth {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00ff00;
+            margin-bottom: 20px;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            margin-top: 20px;
+        }
+       
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.9rem;
+        }
+       
+        th {
+            color: #ff00ff;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+       
+        .back-btn {
+            background-color: #ff00ff;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 0 10px #ff00ff;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+        .back-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px #ff00ff, 0 0 30px #ff00ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="logo.png" alt="GlowFlow Logo" class="logo">
+        <div class="tile">
+            <h1>My Stock</h1>
+            <div id="inventoryTotalWorth"></div>
+        </div>
+    </div>
+
+    <div class="tile">
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Description</th>
+                    <th>Quantity</th>
+                    <th>Buying Price</th>
+                    <th>Selling Price</th>
+                    <th>Profit per Unit</th>
+                </tr>
+            </thead>
+            <tbody id="stockTableBody">
+                </tbody>
+        </table>
+    </div>
+   
+    <button class="back-btn" onclick="window.location.href='inventory.html'">Back to Inventory Management</button>
+
+    <script>
+        const products = JSON.parse(localStorage.getItem('products')) || [];
+
+        function renderStockTable() {
+            const tableBody = document.getElementById('stockTableBody');
+            let totalWorth = 0;
+            tableBody.innerHTML = '';
+
+            products.forEach(product => {
+                const profitPerUnit = product.price - product.buyPrice;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${product.name}</td>
+                    <td>${product.description}</td>
+                    <td>${product.stock}</td>
+                    <td>$${product.buyPrice.toFixed(2)}</td>
+                    <td>$${product.price.toFixed(2)}</td>
+                    <td>$${profitPerUnit.toFixed(2)}</td>
+                `;
+                tableBody.appendChild(row);
+                totalWorth += product.stock * product.price;
+            });
+           
+            document.getElementById('inventoryTotalWorth').textContent = `Total Inventory Worth: $${totalWorth.toFixed(2)}`;
+        }
+
+        renderStockTable();
+    </script>
+</body>
+</html>
