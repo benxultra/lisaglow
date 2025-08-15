@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlowFlow - Sales</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --desert-blue: #1c3d5a;
+            --off-white: #f5f5f5;
+            --cream: #fffdd0;
+            --desert-sand: #e0ac78;
+            --hot-pink: #ff69b4;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Ubuntu', sans-serif;
+            background-color: var(--desert-blue);
+            color: var(--off-white);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-sizing: border-box;
+            font-size: 95%;
+        }
+        .navbar {
+            width: 100%;
+            background-color: rgba(224, 172, 120, 0.1);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            box-shadow: 0 2px 15px rgba(224, 172, 120, 0.3);
+            flex-wrap: wrap;
+        }
+        .nav-btn {
+            background-color: transparent;
+            color: var(--off-white);
+            border: 2px solid var(--desert-sand);
+            padding: 8px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background-color 0.2s, color 0.2s, transform 0.2s;
+            font-family: 'Ubuntu', sans-serif;
+            white-space: nowrap;
+        }
+        .nav-btn:hover {
+            background-color: var(--desert-sand);
+            color: var(--desert-blue);
+            transform: translateY(-2px);
+        }
+        .header {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .logo {
+            width: 80px;
+            height: auto;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 10px var(--desert-sand));
+        }
+        .tile {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 0 20px rgba(224, 172, 120, 0.5);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(224, 172, 120, 0.2);
+        }
+        .no-glow-tile {
+            box-shadow: none;
+            color: white;
+        }
+        h1, h2, h3 {
+            margin-top: 0;
+            text-shadow: 0 0 5px var(--desert-sand);
+            color: var(--desert-sand);
+        }
+        .tile h2, .tile h3 {
+            color: var(--off-white);
+        }
+        .sales-summary-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .sales-summary-tile {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px;
+            box-shadow: 0 0 20px rgba(224, 172, 120, 0.5);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(224, 172, 120, 0.2);
+            flex-wrap: wrap;
+        }
+        #dailySalesBox {
+            background-color: var(--off-white);
+            color: var(--desert-blue);
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            white-space: nowrap;
+            margin-top: 10px;
+            font-family: 'Ubuntu', sans-serif;
+        }
+        .report-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .end-of-day-btn {
+            background-color: var(--off-white);
+            color: var(--desert-blue);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+            font-family: 'Ubuntu', sans-serif;
+        }
+        .end-of-day-btn:hover {
+            background-color: #c78d59;
+        }
+        .search-container {
+            position: relative;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        #productSearch {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--desert-sand);
+            background-color: rgba(224, 172, 120, 0.1);
+            color: var(--off-white);
+            border-radius: 5px;
+            font-family: 'Ubuntu', sans-serif;
+            outline: none;
+            transition: box-shadow 0.2s;
+            box-sizing: border-box;
+        }
+        #productSearch:focus {
+            box-shadow: 0 0 10px var(--desert-sand);
+        }
+        .low-stock {
+            color: var(--hot-pink);
+            font-weight: bold;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: var(--desert-blue);
+            padding: 20px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 0 20px rgba(224, 172, 120, 0.5);
+            border: 1px solid rgba(224, 172, 120, 0.2);
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--desert-sand);
+        }
+        .date-filter-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .date-filter-group input {
+            flex: 1;
+            min-width: 120px;
+            padding: 8px;
+            border: 1px solid var(--desert-sand);
+            background-color: rgba(224, 172, 120, 0.1);
+            color: var(--off-white);
+            border-radius: 5px;
+        }
+        .date-filter-group button {
+            background-color: var(--desert-sand);
+            color: var(--desert-blue);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .report-summary-box {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .report-summary-box p {
+            margin: 5px 0;
+            font-size: 1rem;
+        }
+        .report-summary-box h4 {
+            margin-top: 10px;
+        }
+        .report-table, .transaction-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            table-layout: fixed;
+        }
+        .report-table th, .report-table td,
+        .transaction-table th, .transaction-table td {
+            padding: 8px;
+            border-bottom: 1px solid rgba(224, 172, 120, 0.2);
+            word-wrap: break-word;
+        }
+        .report-table th,
+        .transaction-table th {
+            color: var(--hot-pink);
+        }
+        .chart-container {
+            margin-top: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        .transaction-actions {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--desert-sand);
+            border-radius: 5px;
+            overflow: hidden;
+            background-color: rgba(224, 172, 120, 0.1);
+        }
+        .quantity-control button {
+            background-color: var(--desert-sand);
+            color: var(--desert-blue);
+            border: none;
+            padding: 5px 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            line-height: 1;
+            transition: background-color 0.2s;
+        }
+        .quantity-control button:hover {
+            background-color: #c78d59;
+        }
+        .quantity-control input[type="number"] {
+            width: 40px;
+            padding: 5px 2px;
+            border: none;
+            background-color: transparent;
+            color: var(--off-white);
+            text-align: center;
+            -moz-appearance: textfield;
+            font-family: 'Ubuntu', sans-serif;
+        }
+        .quantity-control input::-webkit-outer-spin-button,
+        .quantity-control input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .transaction-btn {
+            background-color: var(--desert-sand);
+            color: var(--desert-blue);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .transaction-btn:hover {
+            background-color: #c78d59;
+        }
+        .report-advice {
+            margin-top: 20px;
+            background-color: rgba(144, 238, 144, 0.1);
+            padding: 15px;
+            border-left: 5px solid #90ee90;
+            border-radius: 5px;
+        }
+        .report-advice p {
+            margin: 0;
+            color: #90ee90;
+        }
+        .report-alert {
+            margin-top: 20px;
+            background-color: rgba(255, 105, 180, 0.1);
+            padding: 15px;
+            border-left: 5px solid var(--hot-pink);
+            border-radius: 5px;
+        }
+        .report-alert p {
+            margin: 0;
+            color: var(--hot-pink);
+        }
+        #currentDate {
+            color: var(--cream);
+            font-size: 0.9rem;
+            text-align: center;
+            width: 100%;
+            margin-top: 10px;
+        }
+        @media (max-width: 600px) {
+            .navbar { padding: 10px; gap: 10px; }
+            .nav-btn { font-size: 0.9rem; padding: 6px 12px; }
+            .tile { padding: 15px; margin: 15px; }
+            table { font-size: 0.8rem; }
+            th, td { padding: 6px; white-space: normal; word-wrap: break-word; }
+            .sales-summary-tile { flex-direction: column; align-items: stretch; }
+            .modal-content { max-width: 95%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="index.html" class="nav-btn">Dashboard</a>
+        <a href="sales.html" class="nav-btn">Sales</a>
+        <a href="inventory.html" class="nav-btn">Inventory</a>
+    </div>
+
+    <div class="header">
+        <img src="logo.png" alt="GlowFlow Logo" class="logo">
+    </div>
+    
+    <div class="sales-summary-tile">
+        <div id="dailySalesBox">Today's Sales: $<span id="totalPriceToday">0.00</span></div>
+        <button class="end-of-day-btn" onclick="openReportModal()">End of Day Report</button>
+    </div>
+    
+    <div class="tile no-glow-tile">
+        <h2 style="color: white;">New Transaction</h2>
+        <div class="search-container">
+            <input type="text" id="productSearch" placeholder="Search products...">
+        </div>
+        <div style="max-height: 250px; overflow-y: auto;">
+            <table class="transaction-table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Description</th>
+                        <th>Price</th>
+                        <th>In Stock</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="productList">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('reportModal')">&times;</span>
+            <h2>Sales Report</h2>
+            <div class="date-filter-group">
+                <label for="reportStartDate">From:</label>
+                <input type="date" id="reportStartDate">
+                <label for="reportEndDate">To:</label>
+                <input type="date" id="reportEndDate">
+                <button onclick="generateFullReport()">Generate Report</button>
+            </div>
+            <div id="fullReportContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const today = new Date().toISOString().split('T')[0];
+        let products = JSON.parse(localStorage.getItem('products')) || [];
+        let salesHistory = JSON.parse(localStorage.getItem('salesHistory')) || {};
+        let dailySummary = JSON.parse(localStorage.getItem('dailySummary')) || { date: today, totalSalesValue: 0, totalCostOfGoodsSold: 0, soldItems: {} };
+        let topSellingChart = null;
+
+        function updateDailySales() {
+            const totalSales = dailySummary.totalSalesValue || 0;
+            document.getElementById('totalPriceToday').textContent = totalSales.toFixed(2);
+        }
+
+        function renderProductList(filteredProducts = products) {
+            const productList = document.getElementById('productList');
+            productList.innerHTML = '';
+            
+            if (filteredProducts.length === 0) {
+                productList.innerHTML = `<tr><td colspan="6" style="text-align: center;">No products in inventory.</td></tr>`;
+                return;
+            }
+            
+            filteredProducts.forEach(product => {
+                const row = document.createElement('tr');
+                const stockClass = product.stock < 10 ? 'low-stock' : '';
+                row.innerHTML = `
+                    <td>${product.name}</td>
+                    <td>${product.description}</td>
+                    <td>$${product.price.toFixed(2)}</td>
+                    <td class="${stockClass}">${product.stock}</td>
+                    <td>
+                        <div class="quantity-control">
+                            <button onclick="updateQuantity(${product.id}, -1)">-</button>
+                            <input type="number" id="qty-${product.id}" value="0" min="0" max="${product.stock}" oninput="validateQuantity(${product.id})">
+                            <button onclick="updateQuantity(${product.id}, 1)">+</button>
+                        </div>
+                    </td>
+                    <td><button class="transaction-btn" onclick="sellItem(${product.id})">Sell</button></td>
+                `;
+                productList.appendChild(row);
+            });
+        }
+        
+        function updateQuantity(productId, change) {
+            const quantityInput = document.getElementById(`qty-${productId}`);
+            const product = products.find(p => p.id === productId);
+            let currentQuantity = parseInt(quantityInput.value) || 0;
+            let newQuantity = currentQuantity + change;
+            
+            if (newQuantity < 0) newQuantity = 0;
+            if (newQuantity > product.stock) newQuantity = product.stock;
+
+            quantityInput.value = newQuantity;
+        }
+
+        function validateQuantity(productId) {
+            const quantityInput = document.getElementById(`qty-${productId}`);
+            const product = products.find(p => p.id === productId);
+            let value = parseInt(quantityInput.value);
+            
+            if (isNaN(value) || value < 0) {
+                quantityInput.value = 0;
+            } else if (value > product.stock) {
+                quantityInput.value = product.stock;
+            }
+        }
+        
+        function sellItem(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            
+            const quantityInput = document.getElementById(`qty-${productId}`);
+            const quantity = parseInt(quantityInput.value);
+
+            if (quantity <= 0 || isNaN(quantity)) {
+                alert('Please enter a valid quantity greater than 0.');
+                return;
+            }
+            if (quantity > product.stock) {
+                alert(`Cannot sell ${quantity} units. Only ${product.stock} are available.`);
+                return;
+            }
+
+            product.stock -= quantity;
+            
+            // Ensure dailySummary.soldItems is an object
+            if (!dailySummary.soldItems) {
+                dailySummary.soldItems = {};
+            }
+            
+            if (!dailySummary.soldItems[product.name]) {
+                dailySummary.soldItems[product.name] = { quantity: 0, cost: 0, price: 0 };
+            }
+            
+            dailySummary.soldItems[product.name].quantity += quantity;
+            dailySummary.soldItems[product.name].cost += quantity * product.buyPrice;
+            dailySummary.soldItems[product.name].price += quantity * product.price;
+
+            dailySummary.totalSalesValue += quantity * product.price;
+            dailySummary.totalCostOfGoodsSold += quantity * product.buyPrice;
+            
+            localStorage.setItem('products', JSON.stringify(products));
+            localStorage.setItem('dailySummary', JSON.stringify(dailySummary));
+
+            alert(`Successfully sold ${quantity} of ${product.name}!`);
+            
+            renderProductList();
+            updateDailySales();
+        }
+        
+        const productSearchInput = document.getElementById('productSearch');
+        productSearchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredProducts = products.filter(product =>
+                product.name.toLowerCase().includes(searchTerm) ||
+                product.description.toLowerCase().includes(searchTerm)
+            );
+            renderProductList(filteredProducts);
+        });
+
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function openReportModal() {
+            const reportContent = document.getElementById('fullReportContent');
+            const eodDate = new Date().toISOString().split('T')[0];
+            
+            const totalSalesValue = (dailySummary && dailySummary.totalSalesValue) ? dailySummary.totalSalesValue : 0;
+            const totalCostOfGoodsSold = (dailySummary && dailySummary.totalCostOfGoodsSold) ? dailySummary.totalCostOfGoodsSold : 0;
+            const profit = totalSalesValue - totalCostOfGoodsSold;
+            
+            let reportHtml = `<div class="report-summary-box">`;
+            reportHtml += `<p><strong>End of Day Report:</strong> ${eodDate}</p>`;
+            reportHtml += `<p><strong>Total Sales:</strong> $${totalSalesValue.toFixed(2)}</p>`;
+            reportHtml += `<p><strong>Cost of Goods Sold:</strong> $${totalCostOfGoodsSold.toFixed(2)}</p>`;
+            reportHtml += `<p><strong>Profit:</strong> $${profit.toFixed(2)}</p>`;
+            reportHtml += `</div>`;
+            
+            reportHtml += `<h4>Items Sold Today:</h4>`;
+            reportHtml += `<table class="report-table" id="eodTable">`;
+            reportHtml += `<thead><tr><th>Item</th><th>Quantity</th><th>Price</th></tr></thead><tbody>`;
+
+            const soldItemsArray = (dailySummary && dailySummary.soldItems) ? Object.entries(dailySummary.soldItems) : [];
+            const sortedSoldItems = soldItemsArray.sort(([,a], [,b]) => b.quantity - a.quantity);
+            
+            if (sortedSoldItems.length > 0) {
+                for (const [item, itemData] of sortedSoldItems) {
+                    reportHtml += `<tr><td>${item}</td><td>${itemData.quantity}</td><td>$${(itemData.price || 0).toFixed(2)}</td></tr>`;
+                }
+            } else {
+                reportHtml += `<tr><td colspan="3" style="text-align: center;">No items were sold today.</td></tr>`;
+            }
+            
+            reportHtml += `</tbody></table>`;
+            
+            if (sortedSoldItems.length > 0) {
+                const topSeller = sortedSoldItems[0][0];
+                reportHtml += `<div class="report-advice">
+                    <p><strong>Business Advice:</strong> Your top-selling item today was **${topSeller}**. It would be wise to ensure you have a healthy stock of this product to meet customer demand.</p>
+                </div>`;
+            }
+
+            const lowStockItems = products.filter(p => p.stock < 10);
+            if (lowStockItems.length > 0) {
+                reportHtml += `<div class="report-alert">
+                    <p><strong>Low Stock Alert:</strong> The following items are running low:</p>
+                    <ul>`;
+                lowStockItems.forEach(item => {
+                    reportHtml += `<li><strong>${item.name}</strong> - Only ${item.stock} remaining.</li>`;
+                });
+                reportHtml += `</ul></div>`;
+            }
+
+            reportContent.innerHTML = reportHtml;
+            openModal('reportModal');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const todayDate = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = todayDate.toLocaleDateString('en-US', options);
+
+            if (dailySummary.date !== today) {
+                salesHistory[dailySummary.date] = dailySummary;
+                localStorage.setItem('salesHistory', JSON.stringify(salesHistory));
+                dailySummary = { date: today, totalSalesValue: 0, totalCostOfGoodsSold: 0, soldItems: {} };
+                localStorage.setItem('dailySummary', JSON.stringify(dailySummary));
+            }
+            products = JSON.parse(localStorage.getItem('products')) || [];
+            renderProductList();
+            updateDailySales();
+        });
+    </script>
+</body>
+</html>
